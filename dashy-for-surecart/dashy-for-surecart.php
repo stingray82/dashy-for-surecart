@@ -5,7 +5,8 @@
  * Requires at least: 6.5
  * Requires PHP:      7.4
  * Version:           1.1
- * Author:            Really Useful Plugins
+ * Author:            ReallyUsefulPlugins.com
+ * Author URI: https://Reallyusefulplugins.com
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       dashy_for_surecart
