@@ -1,0 +1,17 @@
+sc-icon[name="my-custom-icon"] {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background: url("../images/ticket.svg") no-repeat center center;
+  background-size: contain;
+  text-indent: -9999px; /* Hide any text if SureCart tries to display the name */
+}
+
+sc-icon[name="my-tickets-icon"] {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background: url("../images/ticket.svg") no-repeat center center;
+  background-size: contain;
+  text-indent: -9999px; /* Hide any fallback text */
+}
