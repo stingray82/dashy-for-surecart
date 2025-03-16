@@ -4,7 +4,7 @@
  * Description:       Easily add Dashboard Tabs to SureCart with Dashy, Custom Icons, Page/Post or Custom Post Type or just load a shortcode the easy way
  * Requires at least: 6.5
  * Requires PHP:      7.4
- * Version:           1.1
+ * Version:           1.12
  * Author:            ReallyUsefulPlugins.com
  * Author URI: https://Reallyusefulplugins.com
  * License:           GPL-2.0-or-later
@@ -85,4 +85,6 @@ namespace {
     if ( ! defined( 'ABSPATH' ) ) {
         exit;
     }
+
+    
 }
