@@ -1,11 +1,4 @@
 <?php
-/**
- * Plugin Name: Surecart Dashboard Tabs Manager
- * Description: Allows shop owners to add, edit, and remove custom dashboard tabs via a GUI with dynamic icon styling, media uploader support, and a dynamic post type selector. The "Post Type" column remains in place even when hidden.
- * Version: 1.3.4
- * Author: Your Name
- */
-
 if ( ! defined( 'ABSPATH' ) ) {
     exit; // Exit if accessed directly.
 }
