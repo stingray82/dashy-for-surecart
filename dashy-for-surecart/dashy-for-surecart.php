@@ -5,7 +5,7 @@
  * Tested up to:        6.7.2
  * Requires at least:   6.5
  * Requires PHP:        8.0
- * Version:             1.21
+ * Version:             1.22
  * Author:              ReallyUsefulPlugins.com
  * Author URI:          https://Reallyusefulplugins.com
  * License:             GPL-2.0-or-later
@@ -57,7 +57,7 @@ namespace rupdashextendersc\SureCartDashboard {
 }
 
 namespace {
-    function initialize_plugin_update_checker() {
+    function rup_dashy_for_surecart_initialize_plugin_update_checker() {
         // Ensure the required function is available.
         if ( ! function_exists( 'get_plugin_data' ) ) {
             require_once ABSPATH . 'wp-admin/includes/plugin.php';
@@ -75,8 +75,8 @@ namespace {
             '_main_file'       => __FILE__,
             '_dir'             => plugin_dir_path( __FILE__ ),
             '_url'             => plugin_dir_url( __FILE__ ),
-            '_access_key'      => 'V29Ay8bKd753AdHdeemVZA77UjbmzZMNk',     // Replace with your access key.
-            '_server_location' => 'https://updater.reallyusefulplugins.com/gateway.php'
+            '_access_key'      => 'V29Ay8bKd753AdHdeemVZA77UjbmzZMNk',
+            '_server_location' => 'https://updater.reallyusefulplugins.com/u/'
         );
 
         // Loop through the array and define each constant dynamically.
@@ -109,6 +109,6 @@ namespace {
         );
     }
 
-    add_action( 'init', 'initialize_plugin_update_checker' );
+    add_action( 'init', 'rup_dashy_for_surecart_initialize_plugin_update_checker' );
 }
 
