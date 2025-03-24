@@ -4,6 +4,7 @@ REM CONFIGURATION - adjust these paths as needed
 REM ============================================
 SET "HEADER_SCRIPT=C:\Ignore By Avast\0. PATHED Items\Plugins\deployscripts\myplugin_headers.php"
 SET "PLUGIN_DIR=C:\Users\Nathan\Git\dashy-for-surecart\dashy-for-surecart"
+IF "%PLUGIN_DIR:~-1%"=="\" SET "PLUGIN_DIR=%PLUGIN_DIR:~0,-1%"
 SET "PLUGIN_FILE=%PLUGIN_DIR%\dashy-for-surecart.php"
 SET "CHANGELOG_FILE=C:\Users\Nathan\Git\rup-changelogs\Dashy for SureCart.txt"
 SET "STATIC_FILE=static.txt"

@@ -24,6 +24,11 @@ After activating the plugin, navigate to the Dashboard Tabs settings and click "
 = Can I customize the tab icons? =
 Yes, you can upload custom icons directly via the plugin settings.
 == Changelog ==
+=1.22 ( 24 March 2025) =
+Tweaked: Layout
+Fixed: Some reports of non loading menu
+Tweaked: Update Location Changed
+
 = 1.21 (20 March 2025) =
 Tweaked: Updater Settings
 
