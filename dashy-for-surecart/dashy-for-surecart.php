@@ -107,8 +107,12 @@ namespace {
             $main_file,
             $slug
         );
+     require $dir . 'inc/tab-extender.php';
+
     }
 
     add_action( 'init', 'rup_dashy_for_surecart_initialize_plugin_update_checker' );
+
+   
 }
 
