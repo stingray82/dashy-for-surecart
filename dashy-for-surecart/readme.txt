@@ -24,7 +24,16 @@ After activating the plugin, navigate to the Dashboard Tabs settings and click "
 = Can I customize the tab icons? =
 Yes, you can upload custom icons directly via the plugin settings.
 == Changelog ==
-=1.22 ( 24 March 2025) =
+= 1.25 ( 20 May 2025) =
+Fixed: Issues with some installations running brick 2.0 Alpha, this will need checking against the final release but should stop issues now
+
+= 1.24 ( 5 May 2025) =
+Tweaked: Tested 6.8.1
+
+= 1.23 ( 4 April 2025) =
+Fixed: Minor Bug Fix
+
+= 1.22 ( 24 March 2025) =
 Tweaked: Layout
 Fixed: Some reports of non loading menu
 Tweaked: Update Location Changed
