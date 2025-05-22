@@ -13,6 +13,7 @@
  * Text Domain:         dashy-for-surecart
  * Website:             https://reallyusefulplugins.com
  */
+
 namespace rupdashextendersc\SureCartDashboard {
     if ( ! defined( 'ABSPATH' ) ) {
         exit; // Exit if accessed directly.
