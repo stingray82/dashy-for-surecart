@@ -1,11 +1,11 @@
-=== dashy for surecart ===
+=== Dashy For SureCart ===
 Contributors: reallyusefulplugins
 Donate link: https://reallyusefulplugins.com/donate
-Tags: dashboard, tabs, surecart, custom icons, shortcode
-Requires at least: 
-Tested up to: 
-Stable tag: 
-Requires PHP: 
+Tags: surecart, dashboard, tabs, ecommerce
+Requires at least: 6.5
+Tested up to: 6.8.1
+Stable tag: 1.25
+Requires PHP: 8.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 

@@ -9,11 +9,16 @@ Requires PHP: 8.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
+Easily add Dashboard Tabs to SureCart with Dashy – a plugin that allows you to add custom dashboard tabs with dynamic content,
+custom icons, and the flexibility to load content via Page/Post, Custom Post Type, or shortcode.
+
 == Description ==
+
 Easily add Dashboard Tabs to SureCart with Dashy – a plugin that allows you to add custom dashboard tabs with dynamic content,
 custom icons, and the flexibility to load content via Page/Post, Custom Post Type, or shortcode.
 
 == Installation ==
+
 1. Upload the `dashy-for-surecart` folder to the `/wp-content/plugins/` directory.
 2. Activate the plugin through the 'Plugins' menu in WordPress.
 3. Configure the plugin settings under the Dashboard Tabs menu in your WordPress admin area.
@@ -22,8 +27,8 @@ custom icons, and the flexibility to load content via Page/Post, Custom Post Typ
 = How do I add a new dashboard tab? =
 After activating the plugin, navigate to the Dashboard Tabs settings and click "Add New" to create a new tab.
 = Can I customize the tab icons? =
-Yes, you can upload custom icons directly via the plugin settings.
-== Changelog ==
+Yes, you can upload custom icons directly via the plugin settings. 
+== Changelog == 
 = 1.25 ( 20 May 2025) =
 Fixed: Issues with some installations running brick 2.0 Alpha, this will need checking against the final release but should stop issues now
 
