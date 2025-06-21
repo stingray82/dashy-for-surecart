@@ -4,7 +4,7 @@ Donate link: https://reallyusefulplugins.com/donate
 Tags: surecart, dashboard, tabs, ecommerce
 Requires at least: 6.5
 Tested up to: 6.8.1
-Stable tag: 1.26
+Stable tag: 1.27
 Requires PHP: 8.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -29,6 +29,12 @@ After activating the plugin, navigate to the Dashboard Tabs settings and click "
 = Can I customize the tab icons? =
 Yes, you can upload custom icons directly via the plugin settings. 
 == Changelog == 
+= 1.27 ( 21 June 2025) =
+New: Updates Now served directly from GitHub using UUPD
+
+= 1.26 ( 21 June 2025) =
+Tweaked: Updates Now served directly from GitHub using UUPD
+
 = 1.25 ( 20 May 2025) =
 Fixed: Issues with some installations running brick 2.0 Alpha, this will need checking against the final release but should stop issues now
 
