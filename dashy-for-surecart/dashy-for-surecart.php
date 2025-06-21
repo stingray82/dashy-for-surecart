@@ -5,7 +5,7 @@
  * Tested up to:      6.8.1
  * Requires at least: 6.5
  * Requires PHP:      8.0
- * Version:           1.25
+ * Version:           1.24
  * Author:            ReallyUsefulPlugins.com
  * Author URI:        https://Reallyusefulplugins.com
  * License:           GPL-2.0-or-later
@@ -58,61 +58,30 @@ namespace rupdashextendersc\SureCartDashboard {
 }
 
 namespace {
-    function rup_dashy_for_surecart_initialize_plugin_update_checker() {
-        // Ensure the required function is available.
-        if ( ! function_exists( 'get_plugin_data' ) ) {
-            require_once ABSPATH . 'wp-admin/includes/plugin.php';
-        }
-        // Get the plugin data from the header.
-        $plugin_data = get_plugin_data( __FILE__ );
-        
-        // Build the constant name prefix using the Text Domain.
-        $prefix = 'rup_' . $plugin_data['TextDomain'];
 
-        // Define the constants and their corresponding values.
-        $constants = array(
-            '_version'         => $plugin_data['Version'],
-            '_slug'            => $plugin_data['TextDomain'],
-            '_main_file'       => __FILE__,
-            '_dir'             => plugin_dir_path( __FILE__ ),
-            '_url'             => plugin_dir_url( __FILE__ ),
-            '_access_key'      => 'V29Ay8bKd753AdHdeemVZA77UjbmzZMNk',
-            '_server_location' => 'https://updater.reallyusefulplugins.com/u/'
-        );
+    define('RUP_SC_D4SC_VERSION', '1.24');
+    
+    function register_plugin_updater() {
+    // 1) Load the universal drop-in.
+    require_once __DIR__ . '/inc/updater.php';
 
-        // Loop through the array and define each constant dynamically.
-        foreach ( $constants as $suffix => $value ) {
-            if ( ! defined( $prefix . $suffix ) ) {
-                define( $prefix . $suffix, $value );
-            }
-        }
+    // 2) Build the updater config array.
+    $updater_config = [
+        'plugin_file' => plugin_basename( __FILE__ ),
+        'slug'        => 'dashy-for-surecart',
+        'name'        => 'Dashy For SureCart',
+        'version'     => RUP_SC_D4SC_VERSION,
+        'key'         => 'CeW5jUv66xCMVZd83QTema',
+        'server'      => 'https://raw.githubusercontent.com/stingray82/dashy-for-surecart/main/uupd/index.json',
+    ];
 
-        // Retrieve the dynamic constants for easier reference.
-        $version         = constant($prefix . '_version');
-        $slug            = constant($prefix . '_slug');
-        $main_file       = constant($prefix . '_main_file');
-        $dir             = constant($prefix . '_dir');
-        $url             = constant($prefix . '_url');
-        $access_key      = constant($prefix . '_access_key');
-        $server_location = constant($prefix . '_server_location');
+    // 3) Register with the updater.
+    \UUPD\V1\UUPD_Updater_V1::register( $updater_config );
+}
 
-        // Build the update server URL dynamically.
-        $updateserver = $server_location . '?key=' . $access_key . '&action=get_metadata&slug=' . $slug;
+// Hook into plugins_loaded with priority 1
+add_action( 'plugins_loaded', 'register_plugin_updater', 1 );
 
-        // Include the update checker.
-        require_once $dir . 'plugin-update-checker/plugin-update-checker.php';
-
-        // Use the fully qualified class name to build the update checker.
-        $my_plugin_update_checker = \YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
-            $updateserver,
-            $main_file,
-            $slug
-        );
-     require $dir . 'inc/tab-extender.php';
-
-    }
-
-    add_action( 'init', 'rup_dashy_for_surecart_initialize_plugin_update_checker' );
 
    
 }
