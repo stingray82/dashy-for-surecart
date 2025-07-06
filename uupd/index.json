@@ -1,7 +1,7 @@
 {
     "slug": "dashy-for-surecart",
     "name": "Dashy For SureCart",
-    "version": "1.27",
+    "version": "1.28",
     "author": "ReallyUsefulPlugins.com",
     "author_homepage": "https://Reallyusefulplugins.com",
     "requires_php": "8.0",
@@ -13,7 +13,7 @@
         "frequently_asked_questions": "= How do I add a new dashboard tab? =<br />\r\nAfter activating the plugin, navigate to the Dashboard Tabs settings and click \"Add New\" to create a new tab.<br />\r\n= Can I customize the tab icons? =<br />\r\nYes, you can upload custom icons directly via the plugin settings.",
         "changelog": "<h4>1.27 ( 21 June 2025)</h4><ul><li>New: Updates Now served directly from GitHub using UUPD</li></ul><h4>1.26 ( 21 June 2025)</h4><ul><li>Tweaked: Updates Now served directly from GitHub using UUPD</li></ul><h4>1.25 ( 20 May 2025)</h4><ul><li>Fixed: Issues with some installations running brick 2.0 Alpha, this will need checking against the final release but should stop issues now</li></ul><h4>1.24 ( 5 May 2025)</h4><ul><li>Tweaked: Tested 6.8.1</li></ul><h4>1.23 ( 4 April 2025)</h4><ul><li>Fixed: Minor Bug Fix</li></ul><h4>1.22 ( 24 March 2025)</h4><ul><li>Tweaked: Layout</li><li>Fixed: Some reports of non loading menu</li><li>Tweaked: Update Location Changed</li></ul><h4>1.21 (20 March 2025)</h4><ul><li>Tweaked: Updater Settings</li></ul><h4>1.2 (18 March 2025)</h4><ul><li>Tweaked: Admin Settings</li><li>Fixed: Spelling Issue</li></ul><h4>1.12 (03 March 2025)</h4><ul><li>Tweaked: Moved Dashboard Tabs Manager menu to Settings &gt; SC Dashboard Tabs.</li><li>Fixed: Resolved issue with the &quot;Select Image&quot; button not functioning.</li></ul><h4>1.11 (28 February 2025)</h4><ul><li>New: Added dynamic post type selector allowing users to choose from all registered public post types.</li><li>Improvement: Enhanced content source field behavior so that the Post Type column remains in place (even when hidden) to avoid layout shifts.</li><li>Tweaked: Updated UI to better distinguish between \u201cpage\u201d and \u201cshortcode/code\u201d content types.</li></ul><h4>1.1 (20 February 2025)</h4><ul><li>New: Integrated dynamic icon styling support by automatically assigning an icon name based on the uploaded icon URL.</li><li>Fixed: Minor admin settings page bugs and improved media uploader functionality.</li></ul><h4>1.01 (15 February 2025)</h4><ul><li>Tweaked: Refined admin interface for managing dashboard tabs.</li><li>Improvement: Added option to hide the Post Type column when content type isn\u2019t \u201cpage\u201d to reduce user confusion.</li></ul><h4>1.0 (10 February 2025)</h4><ul><li>New: Initial release of Surecart Dashboard Tabs Manager with full functionality for adding, editing, and removing custom dashboard tabs.</li><li>New: Supported dynamic icon styling with media uploader integration.</li><li>New: Provided dynamic content sourcing via page/post selection, shortcode processing, and PHP code execution.</li></ul>"
     },
-    "last_updated": "2025-06-21 16:39:35",
+    "last_updated": "2025-07-06 17:46:01",
     "download_url": "https://github.com/stingray82/dashy-for-surecart/releases/latest/download/dashy-for-surecart.zip",
     "banners": {
         "low": "https://raw.githubusercontent.com/stingray82/dashy-for-surecart/main/uupd/banner-772x250.png",

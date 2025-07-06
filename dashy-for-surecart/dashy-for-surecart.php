@@ -5,7 +5,7 @@
  * Tested up to:      6.8.1
  * Requires at least: 6.5
  * Requires PHP:      8.0
- * Version:           1.27
+ * Version:           1.28
  * Author:            ReallyUsefulPlugins.com
  * Author URI:        https://Reallyusefulplugins.com
  * License:           GPL-2.0-or-later
@@ -59,7 +59,7 @@ namespace rupdashextendersc\SureCartDashboard {
 
 namespace {
 
-    define('RUP_SC_D4SC_VERSION', '1.27');
+    define('RUP_SC_D4SC_VERSION', '1.28');
     
     function register_plugin_updater() {
     // 1) Load the universal drop-in.
@@ -76,7 +76,7 @@ namespace {
     ];
 
     // 3) Register with the updater.
-    \UUPD\V1\UUPD_Updater_V1::register( $updater_config );
+    \RUP\Updater\Updater_V1::register( $updater_config );
 }
 
 // Hook into plugins_loaded with priority 1
