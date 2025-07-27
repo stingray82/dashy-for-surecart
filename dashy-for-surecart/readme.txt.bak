@@ -29,6 +29,10 @@ After activating the plugin, navigate to the Dashboard Tabs settings and click "
 = Can I customize the tab icons? =
 Yes, you can upload custom icons directly via the plugin settings. 
 == Changelog == 
+= 1.28 06 July 2025 =
+New: Rescoped RUP_UUPD
+Update: UUPD 1.2.4
+
 = 1.27 ( 21 June 2025) =
 New: Updates Now served directly from GitHub using UUPD
 
