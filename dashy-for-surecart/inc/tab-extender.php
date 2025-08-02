@@ -264,62 +264,71 @@ function rup_sc_sdtm_render_settings_page() {
 add_filter( 'rup_sc_dashextender_surecart_navigation', 'rup_sc_sdtm_register_dashboard_tabs' );
 function rup_sc_sdtm_register_dashboard_tabs( $navigation ) {
     $tabs = get_option( 'custom_dashboard_tabs', array() );
-    if ( is_array( $tabs ) ) {
-        foreach ( $tabs as $tab ) {
-            // Generate a unique slug if not set.
-            $slug = ! empty( $tab['slug'] ) ? sanitize_title( $tab['slug'] ) : sanitize_title( $tab['name'] );
-            // Process the icon field.
-            $icon_value = isset( $tab['icon'] ) ? trim( $tab['icon'] ) : '';
-            $icon_data = array();
-            $icon_name = '';
-            if ( ! empty( $icon_value ) && filter_var( $icon_value, FILTER_VALIDATE_URL ) ) {
-                $icon_data = array( 'icon_url' => $icon_value );
-                $icon_name = $slug;
-            } else {
-                $icon_value = 'default-icon';
-                $icon_data = array( 'icon_name' => $icon_value );
-                $icon_name = $icon_value;
-            }
-            
-            // Merge navigation array.
-            $navigation[ $slug ] = array_merge( array(
-                'name'      => $tab['name'],
-                'href'      => add_query_arg( 'sc-page', $slug, get_permalink() ),
-                'icon_name' => $icon_name,
-            ), $icon_data );
-            
-            // Register content callback.
-            add_action( 'rup_sc_dashextender_surecart_dashboard_right_' . $slug, function() use ( $tab ) {
-                echo '<div class="custom-tab-content">';
-                switch ( $tab['content_type'] ) {
-                    case 'page':
-                        // Get the post type (default to "page" if not set).
-                        $post_type = isset( $tab['post_type'] ) && ! empty( $tab['post_type'] ) ? sanitize_key( $tab['post_type'] ) : 'page';
-                        // Look for a page/post/custom post by its path (slug) in the given post type.
-                        $page = get_page_by_path( $tab['content_source'], OBJECT, $post_type );
-                        if ( $page ) {
-                            echo apply_filters( 'the_content', $page->post_content );
-                        } else {
-                            echo '<p>Content not found. Please check your content source.</p>';
-                        }
-                        break;
-                    case 'shortcode':
-                        echo do_shortcode( $tab['content_source'] );
-                        break;
-                    case 'code':
-                        // WARNING: Using eval() can be dangerous. Only allow trusted code.
-                        eval( '?>' . $tab['content_source'] );
-                        break;
-                    default:
-                        echo '<p>No valid content type selected.</p>';
-                        break;
-                }
-                echo '</div>';
-            });
-        }
+    if ( empty( $tabs ) || ! is_array( $tabs ) ) {
+        return $navigation;
     }
+
+    $current_slug = isset( $_GET['sc-page'] ) ? sanitize_title( $_GET['sc-page'] ) : null;
+
+    // 🔧 If a custom tab is active, unset 'active' on the default Dashboard
+    if ( $current_slug && isset( $navigation['dashboard'] ) && is_array( $navigation['dashboard'] ) ) {
+        $navigation['dashboard']['active'] = false;
+    }
+
+    foreach ( $tabs as $tab ) {
+        $slug = ! empty( $tab['slug'] ) ? sanitize_title( $tab['slug'] ) : sanitize_title( $tab['name'] );
+        $is_active = ( $current_slug && $slug === $current_slug );
+
+        $icon_value = isset( $tab['icon'] ) ? trim( $tab['icon'] ) : '';
+        $icon_name = '';
+        $icon_data = array();
+
+        if ( ! empty( $icon_value ) && filter_var( $icon_value, FILTER_VALIDATE_URL ) ) {
+            $icon_name = $slug;
+            $icon_data = array( 'icon_url' => $icon_value );
+        } else {
+            $icon_name = 'default-icon';
+            $icon_data = array( 'icon_name' => $icon_name );
+        }
+
+        $navigation[ $slug ] = array_merge( array(
+            'name'      => $tab['name'],
+            'href'      => add_query_arg( 'sc-page', $slug, get_permalink() ),
+            'icon_name' => $icon_name,
+            'active'    => $is_active,
+        ), $icon_data );
+
+        add_action( 'rup_sc_dashextender_surecart_dashboard_right_' . $slug, function() use ( $tab ) {
+            echo '<div class="custom-tab-content">';
+            switch ( $tab['content_type'] ) {
+                case 'page':
+                    $post_type = ! empty( $tab['post_type'] ) ? sanitize_key( $tab['post_type'] ) : 'page';
+                    $page = get_page_by_path( $tab['content_source'], OBJECT, $post_type );
+                    echo $page ? apply_filters( 'the_content', $page->post_content ) : '<p>Content not found. Please check your content source.</p>';
+                    break;
+                case 'shortcode':
+                    echo do_shortcode( $tab['content_source'] );
+                    break;
+                case 'code':
+                    if ( current_user_can( 'manage_options' ) ) {
+                        eval( '?>' . $tab['content_source'] );
+                    } else {
+                        echo '<p><strong>Access denied.</strong></p>';
+                    }
+                    break;
+                default:
+                    echo '<p>No valid content type selected.</p>';
+                    break;
+            }
+            echo '</div>';
+        });
+    }
+
     return $navigation;
 }
+
+
+
 
 /* ==========================================================================
    4. Output Dynamic Icon Stylesheet Using <sc-icon> Selector
@@ -337,30 +346,62 @@ function rup_sc_sdtm_output_dynamic_icon_styles() {
     if ( empty( $tabs ) ) {
         return;
     }
+
     echo '<style type="text/css">' . "\n";
+
+    // Track if we need to output the fallback style
+    $needs_fallback = false;
+
     foreach ( $tabs as $tab ) {
         $slug = ! empty( $tab['slug'] ) ? sanitize_title( $tab['slug'] ) : sanitize_title( $tab['name'] );
+        $icon_attr = $slug;
+
         if ( ! empty( $tab['icon'] ) && filter_var( $tab['icon'], FILTER_VALIDATE_URL ) ) {
-            $icon_attr = $slug;
-            echo "sc-icon[name=\"" . esc_attr( $icon_attr ) . "\"] {\n";
-            echo "    display: inline-block;\n";
-            echo "    width: 20px;\n";
-            echo "    height: 20px;\n";
-            echo "    background: url('" . esc_url( $tab['icon'] ) . "') no-repeat center center;\n";
-            echo "    background-size: contain;\n";
-            echo "    text-indent: -9999px;\n";
-            echo "}\n";
+            $icon_url = esc_url( $tab['icon'] );
         } else {
-            // Fallback rule for default-icon.
-            echo "sc-icon[name=\"default-icon\"] {\n";
-            echo "    display: inline-block;\n";
-            echo "    width: 20px;\n";
-            echo "    height: 20px;\n";
-            echo "    background: url('/path/to/fallback-icon.svg') no-repeat center center;\n";
-            echo "    background-size: contain;\n";
-            echo "    text-indent: -9999px;\n";
-            echo "}\n";
+            $icon_attr = 'default-icon';
+            $needs_fallback = true;
+            $icon_url = '/path/to/fallback-icon.svg';
         }
+
+        // Base icon style
+        echo "sc-icon[name=\"" . esc_attr( $icon_attr ) . "\"] {\n";
+        echo "    display: inline-block;\n";
+        echo "    width: 20px;\n";
+        echo "    height: 20px;\n";
+        echo "    background: url('" . $icon_url . "') no-repeat center center;\n";
+        echo "    background-size: contain;\n";
+        echo "    text-indent: -9999px;\n";
+        echo "    transition: background-color 0.2s ease;\n";
+        echo "}\n";
+
+        // Active tab style
+        echo ".sc-navigation__tab.active sc-icon[name=\"" . esc_attr( $icon_attr ) . "\"],\n";
+        echo ".sc-navigation__tab[aria-selected=\"true\"] sc-icon[name=\"" . esc_attr( $icon_attr ) . "\"] {\n";
+        echo "    background-color: #f0f0f0;\n";
+        echo "    border-radius: 4px;\n";
+        echo "}\n";
     }
+
+    // Ensure fallback rule exists even if not triggered in loop
+    if ( $needs_fallback ) {
+        // Just to be sure in case a "default-icon" is referenced but not yet output
+        echo "sc-icon[name=\"default-icon\"] {\n";
+        echo "    display: inline-block;\n";
+        echo "    width: 20px;\n";
+        echo "    height: 20px;\n";
+        echo "    background: url('/path/to/fallback-icon.svg') no-repeat center center;\n";
+        echo "    background-size: contain;\n";
+        echo "    text-indent: -9999px;\n";
+        echo "    transition: background-color 0.2s ease;\n";
+        echo "}\n";
+
+        echo ".sc-navigation__tab.active sc-icon[name=\"default-icon\"],\n";
+        echo ".sc-navigation__tab[aria-selected=\"true\"] sc-icon[name=\"default-icon\"] {\n";
+        echo "    background-color: #f0f0f0;\n";
+        echo "    border-radius: 4px;\n";
+        echo "}\n";
+    }
+
     echo '</style>' . "\n";
 }
