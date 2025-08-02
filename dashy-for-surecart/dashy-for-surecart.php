@@ -5,7 +5,7 @@
  * Tested up to:      6.8.2
  * Requires at least: 6.5
  * Requires PHP:      8.0
- * Version:           1.29.1
+ * Version:           1.29.2
  * Author:            ReallyUsefulPlugins.com
  * Author URI:        https://Reallyusefulplugins.com
  * License:           GPL-2.0-or-later
@@ -59,7 +59,7 @@ namespace rupdashextendersc\SureCartDashboard {
 
 namespace {
 
-    define('RUP_SC_D4SC_VERSION', '1.29.1');
+    define('RUP_SC_D4SC_VERSION', '1.29.2');
     
     function register_plugin_updater() {
     // 1) Load the universal drop-in.
@@ -86,3 +86,14 @@ add_action( 'plugins_loaded', 'register_plugin_updater', 20 );
    
 }
 
+
+// MainWP Icon Filter
+add_filter('mainwp_child_stats_get_plugin_info', function($info, $slug) {
+
+    if ('dashy-for-surecart/dashy-for-surecart.php' === $slug) {
+        $info['icon'] = 'https://raw.githubusercontent.com/stingray82/dashy-for-surecart/main/uupd/icon-128.png'; // Supported types: jpeg, jpg, gif, ico, png
+    }
+
+    return $info;
+
+}, 10, 2);
