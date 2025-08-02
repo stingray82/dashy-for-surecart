@@ -94,6 +94,8 @@ add_filter('mainwp_child_stats_get_plugin_info', function($info, $slug) {
 
 }, 10, 2);
 
+require $dir . 'inc/tab-extender.php';
+
 
    
 }

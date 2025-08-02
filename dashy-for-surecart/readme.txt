@@ -31,6 +31,7 @@ Yes, you can upload custom icons directly via the plugin settings.
 == Changelog == 
 = 1.29.3 2 Aug 2025 =
 Fixed: Icon Filer Issue
+Fixed: Tabs Missing
 
 = 1.29.2 2 Aug 2025 =
 New: MainWP Icon Filter
