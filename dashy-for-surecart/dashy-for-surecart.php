@@ -82,7 +82,6 @@ namespace {
 // Hook into plugins_loaded with priority 1
 add_action( 'plugins_loaded', 'register_plugin_updater', 20 );
 
-/*
 // MainWP Icon Filter
 add_filter('mainwp_child_stats_get_plugin_info', function($info, $slug) {
 
@@ -95,7 +94,7 @@ add_filter('mainwp_child_stats_get_plugin_info', function($info, $slug) {
 }, 10, 2);
 
 
-*/
+
 
 require $dir . 'inc/tab-extender.php';
 
