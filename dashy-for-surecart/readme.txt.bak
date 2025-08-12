@@ -4,7 +4,7 @@ Donate link: https://reallyusefulplugins.com/donate
 Tags: surecart, dashboard, tabs, ecommerce
 Requires at least: 6.5
 Tested up to: 6.8.2
-Stable tag: 1.29.3
+Stable tag: 1.29.4
 Requires PHP: 8.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -29,6 +29,9 @@ After activating the plugin, navigate to the Dashboard Tabs settings and click "
 = Can I customize the tab icons? =
 Yes, you can upload custom icons directly via the plugin settings. 
 == Changelog == 
+= 1.29.4 5 August 2025 =
+Fixed: Comment out WP Icon Filter which is causing issues in latest MainWP
+
 = 1.29.3 2 Aug 2025 =
 Fixed: Icon Filer Issue
 Fixed: Tabs Missing
