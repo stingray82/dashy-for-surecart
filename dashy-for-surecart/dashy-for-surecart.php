@@ -96,7 +96,7 @@ add_filter('mainwp_child_stats_get_plugin_info', function($info, $slug) {
 
 
 
-require $dir . 'inc/tab-extender.php';
+require_once __DIR__ . '/inc/tab-extender.php';
 
 
    
