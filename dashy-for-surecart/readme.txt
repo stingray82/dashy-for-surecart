@@ -3,8 +3,8 @@ Contributors: reallyusefulplugins
 Donate link: https://reallyusefulplugins.com/donate
 Tags: surecart, dashboard, tabs, ecommerce
 Requires at least: 6.5
-Tested up to: 6.9.4
-Stable tag: 1.29.7
+Tested up to: 7.0
+Stable tag: 1.30.0
 Requires PHP: 8.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html

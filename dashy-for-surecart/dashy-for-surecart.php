@@ -2,10 +2,10 @@
 /**
  * Plugin Name:       Dashy For SureCart
  * Description:       Easily add Dashboard Tabs to SureCart with Dashy, Custom Icons, Page/Post or Custom Post Type or just load a shortcode the easy way
- * Tested up to:      6.9.4
+ * Tested up to:      7.0
  * Requires at least: 6.5
  * Requires PHP:      8.0
- * Version:           1.29.7
+ * Version:           1.30.0
  * Author:            ReallyUsefulPlugins.com
  * Author URI:        https://Reallyusefulplugins.com
  * License:           GPL-2.0-or-later
@@ -32,34 +32,89 @@ namespace rupdashextendersc\SureCartDashboard {
          * @param string $template The original template file.
          * @return string The custom dashboard template if the condition is met, or the original template.
          */
-        function override_surecart_dashboard_template( $template ) {
-            // Set default dashboard slug.
+        /**
+         * Return the configured SureCart customer dashboard slug/path.
+         *
+         * Block/FSE themes can resolve pages differently from classic themes, so we
+         * normalise the slug and use it in several detection fallbacks below.
+         *
+         * @return string
+         */
+        function get_dashboard_slug() {
             $dashboard_slug = 'customer-dashboard';
 
-            // Override the default slug if a custom slug is defined via constant.
             if ( defined( 'RUPDASHEXTENDERSC_TEMPLATE_URL' ) && ! empty( RUPDASHEXTENDERSC_TEMPLATE_URL ) ) {
                 $dashboard_slug = RUPDASHEXTENDERSC_TEMPLATE_URL;
             }
-            
-            // Check if the current page matches the dashboard slug.
+
+            return trim( (string) apply_filters( 'rup_sc_d4sc_dashboard_slug', $dashboard_slug ), '/' );
+        }
+
+        /**
+         * Detect the SureCart dashboard request in both classic and FSE/block themes.
+         *
+         * is_page() is not always reliable once a block theme's template resolution and
+         * query loop are involved, so this also checks queried object/page path, request
+         * path and common query vars.
+         *
+         * @return bool
+         */
+        function is_dashboard_request() {
+            if ( is_admin() || wp_doing_ajax() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) {
+                return false;
+            }
+
+            $dashboard_slug = get_dashboard_slug();
+
+            if ( empty( $dashboard_slug ) ) {
+                return false;
+            }
+
             if ( is_page( $dashboard_slug ) ) {
-                // Build the path to the custom dashboard template.
+                return true;
+            }
+
+            $queried = get_queried_object();
+            if ( $queried instanceof \WP_Post ) {
+                $page_uri = trim( (string) get_page_uri( $queried ), '/' );
+                if ( $page_uri === $dashboard_slug || basename( $page_uri ) === basename( $dashboard_slug ) ) {
+                    return true;
+                }
+            }
+
+            $pagename = get_query_var( 'pagename' );
+            if ( ! empty( $pagename ) && trim( (string) $pagename, '/' ) === $dashboard_slug ) {
+                return true;
+            }
+
+            $request_path = isset( $_SERVER['REQUEST_URI'] ) ? strtok( wp_unslash( $_SERVER['REQUEST_URI'] ), '?' ) : '';
+            $request_path = trim( rawurldecode( (string) $request_path ), '/' );
+            $home_path    = trim( (string) wp_parse_url( home_url( '/' ), PHP_URL_PATH ), '/' );
+
+            if ( $home_path && str_starts_with( $request_path, $home_path ) ) {
+                $request_path = trim( substr( $request_path, strlen( $home_path ) ), '/' );
+            }
+
+            return $request_path === $dashboard_slug || basename( $request_path ) === basename( $dashboard_slug );
+        }
+
+        function override_surecart_dashboard_template( $template ) {
+            if ( is_dashboard_request() ) {
                 $custom_template = plugin_dir_path( __FILE__ ) . 'templates/my-surecart-dashboard.php';
-                // If the custom template exists, use it.
                 if ( file_exists( $custom_template ) ) {
                     return $custom_template;
                 }
             }
-            // Otherwise, return the original template.
+
             return $template;
         }
-        add_filter( 'template_include', __NAMESPACE__ . '\\override_surecart_dashboard_template', 9999 );
+        add_filter( 'template_include', __NAMESPACE__ . '\\override_surecart_dashboard_template', PHP_INT_MAX );
     }
 }
 
 namespace {
 
-    define('RUP_SC_D4SC_VERSION', '1.29.7');
+    define('RUP_SC_D4SC_VERSION', '1.30');
     
     function register_plugin_updater() {
     // 1) Load the universal drop-in.

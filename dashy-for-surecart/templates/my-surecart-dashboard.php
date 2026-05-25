@@ -19,12 +19,23 @@ namespace rupdashextendersc\SureCartDashboard {
         exit; // Exit if accessed directly.
     }
 
+    if ( ! class_exists( '\SureCart\Controllers\Web\DashboardController' ) ) {
+        wp_die( esc_html__( 'SureCart DashboardController is not available. Please make sure SureCart is active.', 'dashy-for-surecart' ) );
+    }
+
     $controller = new DashboardController();
     $data       = $controller->getData();
+    $data       = is_array( $data ) ? $data : array();
+
+    $data['navigation']         = isset( $data['navigation'] ) && is_array( $data['navigation'] ) ? $data['navigation'] : array();
+    $data['account_navigation'] = isset( $data['account_navigation'] ) && is_array( $data['account_navigation'] ) ? $data['account_navigation'] : array();
+    $data['active_tab']         = isset( $data['active_tab'] ) ? sanitize_key( $data['active_tab'] ) : 'dashboard';
+    $data['logout_link']        = isset( $data['logout_link'] ) ? $data['logout_link'] : '';
+    $data['user']               = isset( $data['user'] ) && $data['user'] instanceof \WP_User ? $data['user'] : wp_get_current_user();
 
     // If a query parameter "sc-page" is present, override the active_tab.
     if ( isset( $_GET['sc-page'] ) ) {
-        $data['active_tab'] = sanitize_text_field( $_GET['sc-page'] );
+        $data['active_tab'] = sanitize_key( wp_unslash( $_GET['sc-page'] ) );
     }
 
     // Capture original navigation keys (from SureCart before any custom modifications)
@@ -44,7 +55,7 @@ namespace rupdashextendersc\SureCartDashboard {
     $data['navigation'] = apply_filters( 'rup_sc_dashextender_surecart_navigation', $data['navigation'], $data, $controller );
 
     // Now, the active tab should be set in $data['active_tab']
-    $active_tab = $data['active_tab'];
+    $active_tab = sanitize_key( $data['active_tab'] );
     ?>
     <!DOCTYPE html>
     <html <?php language_attributes(); ?>>
