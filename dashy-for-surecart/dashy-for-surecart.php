@@ -114,7 +114,7 @@ namespace rupdashextendersc\SureCartDashboard {
 
 namespace {
 
-    define('RUP_SC_D4SC_VERSION', '1.30');
+    define('RUP_SC_D4SC_VERSION', '1.30.0');
     
     function register_plugin_updater() {
     // 1) Load the universal drop-in.

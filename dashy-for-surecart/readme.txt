@@ -29,6 +29,15 @@ After activating the plugin, navigate to the Dashboard Tabs settings and click "
 = Can I customize the tab icons? =
 Yes, you can upload custom icons directly via the plugin settings.
 == Changelog ==
+= 1.30.0 25 May 2026 =
+New: Beta Support for FSE
+Improvement: Pages / Post Type now auto populate
+Improvement: Menu Item is now in the Sure Cart Menu
+New: Significant fallback for edge cases exist.
+Tweaked: Tested Version now 7.0
+Tweaked: Native Icon Handling
+
+
 = 1.29.7 23 March 2026 =
 Update: Updater to 2.0-Alpha
 Update: Compatibility
