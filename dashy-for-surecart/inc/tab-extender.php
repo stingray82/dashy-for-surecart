@@ -8,14 +8,9 @@ if ( ! defined( 'ABSPATH' ) ) {
    ========================================================================== */
 add_action( 'admin_enqueue_scripts', 'rup_sc_sdtm_enqueue_admin_scripts' );
 function rup_sc_sdtm_enqueue_admin_scripts( $hook ) {
-    // This was the old check:
-    // if ( $hook === 'toplevel_page_sdtm-dashboard-tabs' ) {
-    //     wp_enqueue_media();
-    //     wp_enqueue_script( 'jquery' );
-    // }
+    $screen_page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
 
-    // Now that it's a submenu under "Settings", do:
-    if ( $hook === 'settings_page_sdtm-dashboard-tabs' ) {
+    if ( 'surecart-dashy' === $screen_page || false !== strpos( (string) $hook, 'surecart-dashy' ) ) {
         wp_enqueue_media(); // Enqueue the media uploader scripts.
         wp_enqueue_script( 'jquery' );
     }
@@ -77,43 +72,156 @@ function rup_sc_sdtm_get_content_sources() {
    2. Admin Settings Page for Dashboard Tabs
    ========================================================================== */
 
-// Add a new menu page for managing dashboard tabs.
-add_action( 'admin_menu', 'rup_sc_sdtm_add_admin_menu' );
+// Add Dashy under the SureCart admin menu.
+add_action( 'admin_menu', 'rup_sc_sdtm_add_admin_menu', 99 );
 function rup_sc_sdtm_add_admin_menu() {
-// add_menu_page(
-//     'Dashboard Tabs',
-//     'Dashboard Tabs',
-//     'manage_options',
-//     'sdtm-dashboard-tabs',
-//     'rup_sc_sdtm_render_settings_page',
-//     'dashicons-admin-generic'
-// );
-
     add_submenu_page(
-    'options-general.php',      // Parent slug for Settings
-    'SC Dashboard Tabs',           // Page title
-    'SC Dashboard Tabs',           // Menu title
-    'manage_options',           // Capability
-    'sdtm-dashboard-tabs',      // Menu slug
-    'rup_sc_sdtm_render_settings_page' // Callback function to render the page
-);
+        'sc-dashboard',
+        'Dashy',
+        'Dashy',
+        'manage_options',
+        'surecart-dashy',
+        'rup_sc_sdtm_render_settings_page'
+    );
 }
+
 // Register the setting to store the dashboard tabs.
 add_action( 'admin_init', 'rup_sc_sdtm_register_settings' );
 function rup_sc_sdtm_register_settings() {
-    register_setting( 'rup_sc_sdtm_options_group', 'custom_dashboard_tabs' );
+    register_setting(
+        'rup_sc_sdtm_options_group',
+        'custom_dashboard_tabs',
+        array(
+            'sanitize_callback' => 'rup_sc_sdtm_sanitize_tabs',
+        )
+    );
+}
+
+
+/**
+ * Sanitize uploaded icon URLs and native SureCart/Lucide icon names.
+ *
+ * @param string $icon Raw icon value.
+ * @return string
+ */
+function rup_sc_sdtm_sanitize_icon_value( $icon ) {
+    $icon = trim( (string) $icon );
+
+    if ( '' === $icon ) {
+        return '';
+    }
+
+    return filter_var( $icon, FILTER_VALIDATE_URL ) ? esc_url_raw( $icon ) : sanitize_title( $icon );
+}
+
+/**
+ * Normalize old/manual page slugs to post IDs when possible while preserving
+ * unknown legacy values for backward compatibility.
+ *
+ * @param mixed $tabs Raw submitted tabs.
+ * @return array
+ */
+function rup_sc_sdtm_sanitize_tabs( $tabs ) {
+    if ( empty( $tabs ) || ! is_array( $tabs ) ) {
+        return array();
+    }
+
+    $clean = array();
+
+    foreach ( $tabs as $tab ) {
+        if ( ! is_array( $tab ) ) {
+            continue;
+        }
+
+        $content_type = isset( $tab['content_type'] ) ? sanitize_key( $tab['content_type'] ) : 'page';
+        $post_type    = isset( $tab['post_type'] ) ? sanitize_key( $tab['post_type'] ) : 'page';
+
+        $clean_tab = array(
+            'name'           => isset( $tab['name'] ) ? sanitize_text_field( wp_unslash( $tab['name'] ) ) : '',
+            'slug'           => isset( $tab['slug'] ) ? sanitize_title( wp_unslash( $tab['slug'] ) ) : '',
+            'icon'           => isset( $tab['icon'] ) ? rup_sc_sdtm_sanitize_icon_value( wp_unslash( $tab['icon'] ) ) : '',
+            'content_type'   => in_array( $content_type, array( 'page', 'shortcode', 'code' ), true ) ? $content_type : 'page',
+            'post_type'      => $post_type,
+            'content_source' => isset( $tab['content_source'] ) ? wp_kses_post( wp_unslash( $tab['content_source'] ) ) : '',
+        );
+
+        if ( 'page' === $clean_tab['content_type'] ) {
+            $clean_tab['content_source'] = rup_sc_sdtm_normalize_content_source( $clean_tab['content_source'], $post_type );
+        }
+
+        if ( '' !== $clean_tab['name'] || '' !== $clean_tab['slug'] ) {
+            $clean[] = $clean_tab;
+        }
+    }
+
+    return $clean;
+}
+
+/**
+ * Convert a page/post/CPT source slug to an ID when it can be found.
+ * Unknown values are preserved so old manual entries do not break.
+ *
+ * @param string $source Saved source value.
+ * @param string $post_type Post type to search.
+ * @return string
+ */
+function rup_sc_sdtm_normalize_content_source( $source, $post_type = 'page' ) {
+    $source = trim( (string) $source );
+
+    if ( '' === $source ) {
+        return '';
+    }
+
+    if ( is_numeric( $source ) ) {
+        return (string) absint( $source );
+    }
+
+    $post_type = sanitize_key( $post_type ?: 'page' );
+    $post      = get_page_by_path( sanitize_title( $source ), OBJECT, $post_type );
+
+    if ( ! $post ) {
+        $post = get_page_by_path( $source, OBJECT, $post_type );
+    }
+
+    return $post instanceof WP_Post ? (string) $post->ID : $source;
+}
+
+/**
+ * Quietly migrate existing option values on admin load.
+ *
+ * This removes the need to show a duplicate manual field in the UI. Old slugs
+ * are converted to IDs when possible, and anything unresolved is preserved.
+ */
+add_action( 'admin_init', 'rup_sc_sdtm_maybe_migrate_saved_tabs' );
+function rup_sc_sdtm_maybe_migrate_saved_tabs() {
+    if ( ! current_user_can( 'manage_options' ) ) {
+        return;
+    }
+
+    $tabs = get_option( 'custom_dashboard_tabs', array() );
+    if ( empty( $tabs ) || ! is_array( $tabs ) ) {
+        return;
+    }
+
+    $migrated = rup_sc_sdtm_sanitize_tabs( $tabs );
+
+    if ( $migrated !== $tabs ) {
+        update_option( 'custom_dashboard_tabs', $migrated );
+    }
 }
 
 
 /**
  * Render the content source field.
  *
- * For page/post/CPT content, the hidden input is the canonical saved value.
- * The dropdown is a helper populated by AJAX, and the manual field keeps old
- * slug-based/manual entries editable for backward compatibility.
+ * For page/post/CPT content, the hidden input remains the canonical saved value.
+ * Existing manual slugs are migrated to IDs when possible. If a legacy value
+ * cannot be resolved, it is preserved in the hidden input and shown as the
+ * selected legacy option so the admin page stays uncluttered.
  */
 function rup_sc_sdtm_render_content_source_field( $index, $tab ) {
     $content_type   = isset( $tab['content_type'] ) ? $tab['content_type'] : 'page';
+    $post_type      = isset( $tab['post_type'] ) ? sanitize_key( $tab['post_type'] ) : 'page';
     $content_source = isset( $tab['content_source'] ) ? (string) $tab['content_source'] : '';
 
     if ( 'code' === $content_type ) {
@@ -129,16 +237,13 @@ function rup_sc_sdtm_render_content_source_field( $index, $tab ) {
         <?php
         return;
     }
+
+    $normalized_source = rup_sc_sdtm_normalize_content_source( $content_source, $post_type );
     ?>
-    <input type="hidden" class="sdtm-content-source-value" name="custom_dashboard_tabs[<?php echo esc_attr( $index ); ?>][content_source]" value="<?php echo esc_attr( $content_source ); ?>" />
-    <select class="sdtm-content-source-select" data-selected="<?php echo esc_attr( $content_source ); ?>" style="min-width:220px;max-width:100%;">
+    <input type="hidden" class="sdtm-content-source-value" name="custom_dashboard_tabs[<?php echo esc_attr( $index ); ?>][content_source]" value="<?php echo esc_attr( $normalized_source ); ?>" />
+    <select class="sdtm-content-source-select" data-selected="<?php echo esc_attr( $normalized_source ); ?>" data-legacy="<?php echo esc_attr( $content_source ); ?>" style="min-width:260px;max-width:100%;">
         <option value=""><?php esc_html_e( 'Loading…', 'dashy-for-surecart' ); ?></option>
     </select>
-    <br />
-    <label style="display:block;margin-top:6px;">
-        <span class="description"><?php esc_html_e( 'Manual slug or ID:', 'dashy-for-surecart' ); ?></span>
-        <input type="text" class="sdtm-content-source-manual" value="<?php echo esc_attr( $content_source ); ?>" placeholder="<?php esc_attr_e( 'Enter slug or ID', 'dashy-for-surecart' ); ?>" style="width:100%;max-width:260px;" />
-    </label>
     <?php
 }
 
@@ -149,7 +254,7 @@ function rup_sc_sdtm_render_settings_page() {
     $tabs = get_option( 'custom_dashboard_tabs', array() );
     ?>
     <div class="wrap">
-        <h1>SureCart Dashboard Tabs Manager</h1>
+        <h1>Dashy</h1>
         <form method="post" action="options.php">
             <?php 
                 settings_fields( 'rup_sc_sdtm_options_group' );
@@ -163,7 +268,7 @@ function rup_sc_sdtm_render_settings_page() {
                         <th>Icon URL / Class</th>
                         <th>Content Type</th>
                         <th class="sdtm-post-type-th">Post Type</th>
-                        <th>Content Source</th>
+                        <th>Content</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -241,9 +346,7 @@ function rup_sc_sdtm_render_settings_page() {
         function pageSourceField(index, currentValue) {
             currentValue = currentValue || '';
             return '<input type="hidden" class="sdtm-content-source-value" name="' + sourceName(index) + '" value="' + $('<div>').text(currentValue).html() + '" />' +
-                '<select class="sdtm-content-source-select" data-selected="' + $('<div>').text(currentValue).html() + '" style="min-width:220px;max-width:100%;"><option value="">Loading…</option></select>' +
-                '<br><label style="display:block;margin-top:6px;"><span class="description">Manual slug or ID:</span> ' +
-                '<input type="text" class="sdtm-content-source-manual" value="' + $('<div>').text(currentValue).html() + '" placeholder="Enter slug or ID" style="width:100%;max-width:260px;" /></label>';
+                '<select class="sdtm-content-source-select" data-selected="' + $('<div>').text(currentValue).html() + '" data-legacy="' + $('<div>').text(currentValue).html() + '" style="min-width:260px;max-width:100%;"><option value="">Loading…</option></select>';
         }
 
         function textSourceField(index, currentValue) {
@@ -266,13 +369,13 @@ function rup_sc_sdtm_render_settings_page() {
             var $postType = $row.find('.sdtm-post-type');
             var $select = $row.find('.sdtm-content-source-select');
             var $hidden = $row.find('.sdtm-content-source-value');
-            var $manual = $row.find('.sdtm-content-source-manual');
 
             if (!$select.length || !$postType.length) {
                 return;
             }
 
-            var selected = ($hidden.val() || $select.data('selected') || $manual.val() || '').toString();
+            var selected = ($hidden.val() || $select.data('selected') || $select.data('legacy') || '').toString();
+            var legacy = ($select.data('legacy') || selected || '').toString();
             $select.html('<option value="">Loading…</option>').prop('disabled', true);
 
             $.post(ajaxurl, {
@@ -282,30 +385,36 @@ function rup_sc_sdtm_render_settings_page() {
             }).done(function(response){
                 var options = '<option value="">Select content…</option>';
                 var matched = false;
+                var matchedValue = '';
 
                 if (response && response.success && $.isArray(response.data)) {
                     $.each(response.data, function(_, item){
                         var value = item.id.toString();
                         var label = item.title + ' (' + item.slug + ', ID ' + item.id + ')';
-                        var isMatch = selected && (selected === value || selected === item.slug);
+                        var isMatch = selected && (selected === value || selected === item.slug || legacy === value || legacy === item.slug);
                         if (isMatch) {
                             matched = true;
+                            matchedValue = value;
                         }
                         options += '<option value="' + $('<div>').text(value).html() + '" data-slug="' + $('<div>').text(item.slug).html() + '"' + (isMatch ? ' selected' : '') + '>' + $('<div>').text(label).html() + '</option>';
                     });
                 }
 
-                options += '<option value="__manual__"' + (selected && !matched ? ' selected' : '') + '>Use manual slug/ID</option>';
+                if (selected && !matched) {
+                    options += '<option value="' + $('<div>').text(selected).html() + '" selected>Saved legacy value: ' + $('<div>').text(selected).html() + '</option>';
+                }
+
                 $select.html(options).prop('disabled', false);
 
-                // Preserve old manual values. Only normalize to ID when the admin
-                // actually chooses an item from the dropdown.
-                if (selected && !matched) {
+                if (matched && matchedValue) {
+                    // Auto-migrate old slug values to post IDs without exposing a duplicate manual field.
+                    $hidden.val(matchedValue);
+                } else if (selected) {
                     $hidden.val(selected);
-                    $manual.val(selected);
                 }
             }).fail(function(){
-                $select.html('<option value="__manual__" selected>Use manual slug/ID</option>').prop('disabled', false);
+                var selected = ($hidden.val() || '').toString();
+                $select.html(selected ? '<option value="' + $('<div>').text(selected).html() + '" selected>Saved legacy value: ' + $('<div>').text(selected).html() + '</option>' : '<option value="">Unable to load content</option>').prop('disabled', false);
             });
         }
 
@@ -370,19 +479,7 @@ function rup_sc_sdtm_render_settings_page() {
 
             $('#tabs-table').on('change', '.sdtm-content-source-select', function(){
                 var $row = $(this).closest('tr');
-                var value = $(this).val();
-                if (value && value !== '__manual__') {
-                    $row.find('.sdtm-content-source-value').val(value);
-                    $row.find('.sdtm-content-source-manual').val(value);
-                } else if (value === '__manual__') {
-                    $row.find('.sdtm-content-source-value').val($row.find('.sdtm-content-source-manual').val());
-                }
-            });
-
-            $('#tabs-table').on('input', '.sdtm-content-source-manual', function(){
-                var $row = $(this).closest('tr');
                 $row.find('.sdtm-content-source-value').val($(this).val());
-                $row.find('.sdtm-content-source-select').val('__manual__');
             });
 
             var mediaUploader;
@@ -510,29 +607,72 @@ function rup_sc_sdtm_force_surecart_component_loader_for_fse() {
         return;
     }
 
-    if ( function_exists( 'wp_is_block_theme' ) && ! wp_is_block_theme() ) {
-        return;
-    }
-
     $surecart_plugin_url = trailingslashit( WP_PLUGIN_URL ) . 'surecart/';
     $component_base      = $surecart_plugin_url . 'dist/components/surecart/';
     ?>
-    <!-- Dashy For SureCart: forcing SureCart component loader for FSE custom dashboard tab. -->
+    <!-- Dashy For SureCart: forcing SureCart component loader for custom dashboard tab. -->
     <script type="module" src="<?php echo esc_url( $component_base . 'surecart.esm.js' ); ?>"></script>
     <script nomodule src="<?php echo esc_url( $component_base . 'surecart.js' ); ?>"></script>
     <script>
-    window.dashySureCartFSE = window.dashySureCartFSE || {};
-    window.dashySureCartFSE.customTab = <?php echo wp_json_encode( rup_sc_sdtm_get_requested_custom_tab_slug() ); ?>;
+    window.dashySureCartLoader = window.dashySureCartLoader || {};
+    window.dashySureCartLoader.customTab = <?php echo wp_json_encode( rup_sc_sdtm_get_requested_custom_tab_slug() ); ?>;
     window.addEventListener('load', function() {
-        window.dashySureCartFSE.scButtonDefined = !!(window.customElements && window.customElements.get && window.customElements.get('sc-button'));
-        if (!window.dashySureCartFSE.scButtonDefined && window.console && console.warn) {
-            console.warn('Dashy For SureCart: SureCart web components were still not defined after forcing the FSE loader. Check that /wp-content/plugins/surecart/dist/components/surecart/surecart.esm.js exists.');
+        window.dashySureCartLoader.scButtonDefined = !!(window.customElements && window.customElements.get && window.customElements.get('sc-button'));
+        if (!window.dashySureCartLoader.scButtonDefined && window.console && console.warn) {
+            console.warn('Dashy For SureCart: SureCart web components were still not defined after forcing the custom-tab loader. Check that /wp-content/plugins/surecart/dist/components/surecart/surecart.esm.js exists.');
         }
     });
     </script>
     <?php
 }
 add_action( 'wp_head', 'rup_sc_sdtm_force_surecart_component_loader_for_fse', 1 );
+
+/**
+ * FSE custom-tab style safety net.
+ *
+ * On block themes, SureCart's route-specific dashboard CSS can be missed for a
+ * non-native model. The component loader fix hydrates the elements, but without
+ * the dashboard display rules the desktop and mobile navigation can both appear,
+ * making the native icons look detached from their labels. Keep this scoped to
+ * FSE custom-tab requests and only restore the native dashboard shell layout.
+ */
+function rup_sc_sdtm_output_fse_dashboard_shell_styles() {
+    if ( ! rup_sc_sdtm_get_requested_custom_tab_slug() ) {
+        return;
+    }
+
+    if ( function_exists( 'wp_is_block_theme' ) && ! wp_is_block_theme() ) {
+        return;
+    }
+    ?>
+    <style type="text/css" id="dashy-surecart-fse-dashboard-shell-styles">
+        .sc-dashboard .sc-dashboard__header-mobile {
+            display: none !important;
+        }
+
+        .sc-dashboard .sc-dashboard__header sc-tab {
+            display: block;
+        }
+
+        .sc-dashboard .sc-dashboard__header sc-tab sc-icon[slot="prefix"],
+        .sc-dashboard .sc-dashboard__back sc-icon[slot="prefix"],
+        .sc-dashboard .sc-dashboard__user-menu sc-icon {
+            width: 18px;
+            height: 18px;
+            min-width: 18px;
+            vertical-align: middle;
+        }
+
+        @media (max-width: 782px) {
+            .sc-dashboard .sc-dashboard__header-mobile {
+                display: flex !important;
+            }
+        }
+    </style>
+    <?php
+}
+add_action( 'wp_head', 'rup_sc_sdtm_output_fse_dashboard_shell_styles', 20 );
+
 
 /* ==========================================================================
    3. Dynamically Register Dashboard Tabs
@@ -637,12 +777,11 @@ function rup_sc_sdtm_register_dashboard_tabs( $navigation ) {
 
 
 /**
- * FSE custom-tab icon safety net.
+ * Custom-tab icon safety net.
  *
- * On some block-theme custom model routes, the SureCart web components hydrate
+ * On some custom model routes, the SureCart web components hydrate
  * but the icon library is not populated, leaving native <sc-icon> shadow roots
- * with an empty [part="base"] element. This only runs on Dashy custom tabs in
- * FSE themes and only fills known native SureCart/Lucide icons when the SVG is
+ * with an empty [part="base"] element. This only runs on Dashy custom tabs and only fills known native SureCart/Lucide icons when the SVG is
  * missing. Uploaded Dashy image icons are still handled by CSS above.
  */
 function rup_sc_sdtm_output_fse_native_icon_repair() {
@@ -650,11 +789,8 @@ function rup_sc_sdtm_output_fse_native_icon_repair() {
         return;
     }
 
-    if ( function_exists( 'wp_is_block_theme' ) && ! wp_is_block_theme() ) {
-        return;
-    }
     ?>
-    <script id="dashy-surecart-fse-native-icon-repair">
+    <script id="dashy-surecart-native-icon-repair">
     (function(){
         var icons = {
             'server': '<rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line>',

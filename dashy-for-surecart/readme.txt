@@ -4,7 +4,7 @@ Donate link: https://reallyusefulplugins.com/donate
 Tags: surecart, dashboard, tabs, ecommerce
 Requires at least: 6.5
 Tested up to: 7.0
-Stable tag: 1.30.0
+Stable tag: 1.30.1
 Requires PHP: 8.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -27,8 +27,11 @@ custom icons, and the flexibility to load content via Page/Post, Custom Post Typ
 = How do I add a new dashboard tab? =
 After activating the plugin, navigate to the Dashboard Tabs settings and click "Add New" to create a new tab.
 = Can I customize the tab icons? =
-Yes, you can upload custom icons directly via the plugin settings.
-== Changelog ==
+Yes, you can upload custom icons directly via the plugin settings. 
+== Changelog == 
+= 1.30.1 25 May 2026 =
+Fixed: Menu Placement
+
 = 1.30.0 25 May 2026 =
 New: Beta Support for FSE
 Improvement: Pages / Post Type now auto populate
