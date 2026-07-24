@@ -2,10 +2,10 @@
 /**
  * Plugin Name:       Dashy For SureCart
  * Description:       Easily add Dashboard Tabs to SureCart with Dashy, Custom Icons, Page/Post or Custom Post Type or just load a shortcode the easy way
- * Tested up to:      7.0
+ * Tested up to:      7.0.2
  * Requires at least: 6.5
  * Requires PHP:      8.0
- * Version:           1.30.1
+ * Version:           1.30.2
  * Author:            ReallyUsefulPlugins.com
  * Author URI:        https://Reallyusefulplugins.com
  * License:           GPL-2.0-or-later
@@ -114,7 +114,7 @@ namespace rupdashextendersc\SureCartDashboard {
 
 namespace {
 
-    define('RUP_SC_D4SC_VERSION', '1.30.1');
+    define('RUP_SC_D4SC_VERSION', '1.30.2');
     
     function register_plugin_updater() {
     // 1) Load the universal drop-in.
