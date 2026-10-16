@@ -1,13 +1,9 @@
 === Dashy For SureCart ===
-Contributors: reallyusefulplugins
-Donate link: https://reallyusefulplugins.com/donate
 Tags: surecart, dashboard, tabs, ecommerce
 Requires at least: 6.5
-Tested up to: 7.0.2
-Stable tag: 1.30.2
+Tested up to: 7.1.3
+Stable tag: 1.30.3
 Requires PHP: 8.0
-License: GPL-2.0-or-later
-License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 Easily add Dashboard Tabs to SureCart with Dashy – a plugin that allows you to add custom dashboard tabs with dynamic content,
 custom icons, and the flexibility to load content via Page/Post, Custom Post Type, or shortcode.
@@ -29,6 +25,10 @@ After activating the plugin, navigate to the Dashboard Tabs settings and click "
 = Can I customize the tab icons? =
 Yes, you can upload custom icons directly via the plugin settings.
 == Changelog ==
+= 1.30.3 16 October 2026 =
+Updated: UUPD Dependency Updated to Version 2.1 Stable
+Updated: Deploy Methodology
+
 = 1.30.2 24 July 2026 =
 Updated: UUPD Dependency Updated to Version 2.0 Stable
 
